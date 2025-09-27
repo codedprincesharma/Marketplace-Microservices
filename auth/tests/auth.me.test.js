@@ -12,17 +12,34 @@ describe('GET /api/v1/auth/me', () => {
     role: 'user'
   }
 
+  beforeEach(async () => {
+    // no-op: we'll register/login via the API in the happy path test to get a valid token
+  })
+
   it('returns 200 and user info when token is valid', async () => {
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' })
+    // register a user through the API so the server issues a valid token cookie
+    const regRes = await request(app)
+      .post('/api/v1/auth/register')
+      .send({
+        username: payload.username,
+        email: payload.email,
+        password: 'Password1!',
+        fullName: { firstName: 'Me', lastName: 'User' }
+      })
+      .expect(201)
+
+    const cookies = regRes.headers['set-cookie']
+    expect(cookies).toBeDefined()
+    const tokenCookie = cookies.find(c => c.startsWith('token='))
+    expect(tokenCookie).toBeDefined()
 
     const res = await request(app)
       .get('/api/v1/auth/me')
-      .set('Cookie', [`token=${token}`])
+      .set('Cookie', [tokenCookie])
       .expect(200)
 
-    expect(res.body).toHaveProperty('id', payload.id)
-    expect(res.body).toHaveProperty('username', payload.username)
     expect(res.body).toHaveProperty('email', payload.email)
+    expect(res.body).toHaveProperty('username', payload.username)
   })
 
   it('returns 401 when token is missing', async () => {

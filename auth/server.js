@@ -1,7 +1,7 @@
-const app = require('./src/app')
 const dotenv = require('dotenv')
-const connectDb = require('./src/db/db')
 dotenv.config()
+const app = require('./src/app')
+const connectDb = require('./src/db/db')
 
 const PORT = 8080
 connectDb()

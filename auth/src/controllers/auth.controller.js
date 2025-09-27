@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
+const redis = require('../db/redis');
 
 async function registerController(req, res) {
   try {
@@ -113,7 +114,6 @@ async function loginController(req, res) {
   }
 }
 
-
 const getCurrentUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password')
@@ -127,4 +127,24 @@ const getCurrentUser = async (req, res) => {
 }
 
 
-module.exports = { registerController, loginController , getCurrentUser};
+async function logoutController(req, res) {
+  try {
+    const token = req.cookies && req.cookies.token;
+    if (token) {
+      // Optionally, you can blacklist the token in Redis to invalidate it before its expiry
+      await redis.set(`blacklist_${token}`, 'true', 'EX', 24 * 60 * 60); // expire in 1 day
+    }
+
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production'
+    });
+
+    return res.status(200).json({ message: 'Logged out' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+
+module.exports = { registerController, loginController, getCurrentUser, logoutController };
