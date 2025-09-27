@@ -42,7 +42,23 @@ const validateRegistration = [
 ]
 
 
+const validateLogin = [
+  body('email')
+    .not()
+    .isEmail()
+    .withMessage('Invalid email format'),
+  body('username')
+    .isString()
+    .withMessage('Username must be a string'),
+  body('password')
+    .notEmpty()
+    .withMessage('Password is required')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 8 characters long'),
+  responWithValidationErrors
+]
+
 
 module.exports = {
-  validateRegistration
+  validateRegistration, validateLogin
 }
