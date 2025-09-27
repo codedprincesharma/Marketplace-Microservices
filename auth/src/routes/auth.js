@@ -1,6 +1,14 @@
 const express = require('express')
 const router = express.Router()
-const { registerController, loginController, getCurrentUser, logoutController } = require('../controllers/auth.controller')
+const {
+  registerController,
+  loginController,
+  getCurrentUser,
+  logoutController,
+  getUserAddress,
+  addUserAddress,
+  deleteUserAddress,
+} = require('../controllers/auth.controller')
 const { validateRegistration, validateLogin } = require('../middleware/validator.middleware')
 const { authMiddleware } = require('../middleware/auth.middleware')
 
@@ -12,5 +20,9 @@ router.post('/login', validateLogin, loginController)
 router.get('/me', authMiddleware, getCurrentUser)
 // POST /auth/logout
 router.post('/logout', logoutController)
+// Address management
+router.get('/user/addresses', authMiddleware, getUserAddress)
+router.post('/user/addresses', authMiddleware, addUserAddress)
+router.delete('/user/addresses/:addressID', authMiddleware, deleteUserAddress)
 
 module.exports = router

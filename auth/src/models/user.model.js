@@ -6,6 +6,7 @@ const addressSchema = new mongoose.Schema({
   state: { type: String, required: true },
   country: { type: String, required: true },
   zipCode: { type: String, required: true },
+  isDefalt: { type: Boolean, default: false }
 });
 
 const userSchema = new mongoose.Schema(

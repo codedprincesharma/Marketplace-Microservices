@@ -9,8 +9,8 @@ const app = require('../src/app')
 describe('Address APIs', () => {
   let cookie
 
-  beforeAll(async () => {
-    // register user and capture auth cookie
+  beforeEach(async () => {
+    // register user and capture auth cookie before each test (tests/setup clears DB between tests)
     const res = await request(app)
       .post('/api/v1/auth/register')
       .send({
@@ -41,7 +41,8 @@ describe('Address APIs', () => {
       city: 'Testville',
       state: 'TS',
       country: 'Testland',
-      zipCode: '123456'
+      zipCode: '123456',
+      isDefault: true
     }
 
     const res = await request(app)
