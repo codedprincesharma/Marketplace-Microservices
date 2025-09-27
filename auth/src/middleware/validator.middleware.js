@@ -1,6 +1,6 @@
 const { body, validationResult } = require('express-validator')
 
-const responWithValidationErrors = (req, res, next) => {
+const respondWithValidationErrors = (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() })
@@ -38,26 +38,30 @@ const validateRegistration = [
     .withMessage('Last name must be a string')
     .notEmpty()
     .withMessage('Last name is required'),
-  responWithValidationErrors
+  respondWithValidationErrors
 ]
 
 
 const validateLogin = [
   body('email')
-    .not()
-    .isEmail()
-    .withMessage('Invalid email format'),
-  body('username')
-    .isString()
-    .withMessage('Username must be a string'),
-  body('password')
-    .notEmpty()
-    .withMessage('Password is required')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 8 characters long'),
-  responWithValidationErrors
-]
+    .optional()
+    .isEmail().withMessage('Invalid email format'),
 
+  body('username')
+    .optional()
+    .isString().withMessage('Username must be a string'),
+
+  body('password')
+    .notEmpty().withMessage('Password is required')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+
+  (req, res, next) => {
+    if (!req.body.email && !req.body.username) {
+      return res.status(400).json({ errors: [{ msg: 'Either email or username is required' }] })
+    }
+    respondWithValidationErrors(req, res, next)
+  }
+]
 
 module.exports = {
   validateRegistration, validateLogin

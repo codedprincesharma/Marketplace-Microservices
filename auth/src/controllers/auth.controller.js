@@ -65,8 +65,8 @@ async function registerController(req, res) {
 
 async function loginController(req, res) {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { email, password, username } = req.body;
+    if (!email && !username || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
@@ -109,9 +109,22 @@ async function loginController(req, res) {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: 'Server error', error: err.message });
   }
 }
 
 
-module.exports = { registerController, loginController };
+const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password')
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+    res.status(200).json(user)
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+
+
+module.exports = { registerController, loginController , getCurrentUser};
