@@ -9,7 +9,7 @@ const {
   addUserAddress,
   deleteUserAddress,
 } = require('../controllers/auth.controller')
-const { validateRegistration, validateLogin } = require('../middleware/validator.middleware')
+const { validateRegistration, validateLogin, validateAddress, validateAddressId } = require('../middleware/validator.middleware')
 const { authMiddleware } = require('../middleware/auth.middleware')
 
 // POST /auth/register
@@ -22,7 +22,7 @@ router.get('/me', authMiddleware, getCurrentUser)
 router.post('/logout', logoutController)
 // Address management
 router.get('/user/addresses', authMiddleware, getUserAddress)
-router.post('/user/addresses', authMiddleware, addUserAddress)
-router.delete('/user/addresses/:addressID', authMiddleware, deleteUserAddress)
+router.post('/user/addresses', authMiddleware, validateAddress, addUserAddress)
+router.delete('/user/addresses/:addressID', authMiddleware, validateAddressId, deleteUserAddress)
 
 module.exports = router

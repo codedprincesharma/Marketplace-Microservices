@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator')
+const { body, param, validationResult } = require('express-validator')
 
 const respondWithValidationErrors = (req, res, next) => {
   const errors = validationResult(req)
@@ -63,6 +63,55 @@ const validateLogin = [
   }
 ]
 
+const validateAddress = [
+  body('street')
+    .isString()
+    .notEmpty()
+    .withMessage('Street is required'),
+
+  body('city')
+    .isString()
+    .notEmpty()
+    .withMessage('City is required'),
+
+  body('state')
+    .isString()
+    .notEmpty()
+    .withMessage('State is required'),
+
+  body('country')
+    .isString()
+    .notEmpty()
+    .withMessage('Country is required'),
+
+  body('zipCode')
+    .isString()
+    .withMessage('zipCode must be a string')
+    .matches(/^\d+$/)
+    .withMessage('zipCode must contain only digits')
+    .isLength({ min: 3, max: 10 })
+    .withMessage('zipCode length is invalid'),
+
+  body('phone')
+    .optional()
+    .isMobilePhone('any')
+    .withMessage('Invalid phone number'),
+
+  respondWithValidationErrors
+];
+
+
+const validateAddressId = [
+  param('addressID')
+    .isMongoId()
+    .withMessage('Invalid address ID'),
+
+  respondWithValidationErrors
+];
+
 module.exports = {
-  validateRegistration, validateLogin
+  validateRegistration,
+  validateLogin,
+  validateAddress,
+  validateAddressId
 }
