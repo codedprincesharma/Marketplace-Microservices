@@ -43,25 +43,35 @@ const validateRegistration = [
 
 
 const validateLogin = [
-  body('email')
+  body("email")
     .optional()
-    .isEmail().withMessage('Invalid email format'),
+    .isEmail().withMessage("Invalid email format"),
 
-  body('username')
+  body("username")
     .optional()
-    .isString().withMessage('Username must be a string'),
+    .isString().withMessage("Username must be a string"),
 
-  body('password')
-    .notEmpty().withMessage('Password is required')
-    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+  body("password")
+    .notEmpty().withMessage("Password is required")
+    .isLength({ min: 8 }).withMessage("Password must be at least 8 characters long"),
 
   (req, res, next) => {
+    // Require either email OR username
     if (!req.body.email && !req.body.username) {
-      return res.status(400).json({ errors: [{ msg: 'Either email or username is required' }] })
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Either email or username is required" }] });
     }
-    respondWithValidationErrors(req, res, next)
-  }
-]
+
+    // Collect express-validator errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    next();
+  },
+];
 
 const validateAddress = [
   body('street')

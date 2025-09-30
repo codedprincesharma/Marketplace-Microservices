@@ -1,8 +1,17 @@
 const request = require('supertest');
+// mock the auth middleware so tests bypass JWT verification
+jest.mock('../src/middlewares/auth.middleware', () => {
+  return jest.fn(() => (req, res, next) => {
+    req.user = { id: '507f1f77bcf86cd799439011', role: 'seller' };
+    next();
+  });
+});
+
+// mock imagekit implementation (jest will use __mocks__/imagekit.js)
+jest.mock('imagekit');
+
 const app = require('../src/app');
 const Product = require('../src/models/product.model');
-
-jest.mock('imagekit');
 
 describe('POST /api/v1/product', () => {
   beforeAll(() => {
@@ -19,10 +28,10 @@ describe('POST /api/v1/product', () => {
 
     const res = await request(app)
       .post('/api/v1/product')
-      .field('name', 'Test Product')
+      .field('title', 'Test Product')
       .field('description', 'A product')
-      .field('price', JSON.stringify({ amount: 100, currency: 'INR' }))
-      .field('seller', '507f1f77bcf86cd799439011')
+      .field('priceAmount', '100')
+      .field('priceCurrency', 'INR')
       .attach('image', buffer, { filename: 'test.jpg', contentType: 'image/jpeg' });
 
     expect(res.status).toBe(201);
