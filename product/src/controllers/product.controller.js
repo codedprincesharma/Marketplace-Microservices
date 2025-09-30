@@ -69,4 +69,25 @@ async function getProduct(req, res) {
   }
 }
 
-module.exports = { createProduct, getProduct };
+async function getProductById(req, res) {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Product ID is required' });
+    }
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    return res.status(200).json({ success: true, data: product });
+  }
+  catch (error) {
+    console.log('error in getProductById:', error && error.stack ? error.stack : error);
+    return res.status(500).json({ success: false, message: 'internal server error' });
+  }
+}
+
+
+
+
+module.exports = { createProduct, getProduct, getProductById };

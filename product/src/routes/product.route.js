@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const upload = require('../middlewares/upload');
 const createAuthMiddleware = require('../middlewares/auth.middleware')
-const { createProduct, getProduct } = require('../controllers/product.controller');
 const { createProductValidator } = require('../validators/product.validator');
+const { createProduct, getProduct, getProductById } = require('../controllers/product.controller');
 
 
 // POST /api/v1/product/product
@@ -14,7 +14,8 @@ router.post('/',
   createProduct
 );
 
-router.get('/', createAuthMiddleware(['admin', 'seller','user']), getProduct)
+router.get('/', createAuthMiddleware(['admin', 'seller', 'user']), getProduct)
+router.get('/:id', createAuthMiddleware(['admin', 'seller', 'user']), getProductById)
 
 module.exports = router;
 
