@@ -32,8 +32,12 @@ describe('POST /api/v1/product', () => {
       .field('description', 'A product')
       .field('priceAmount', '100')
       .field('priceCurrency', 'INR')
-      .attach('image', buffer, { filename: 'test.jpg', contentType: 'image/jpeg' });
+      .attach('images', buffer, { filename: 'test.jpg', contentType: 'image/jpeg' });
 
+    if (res.status !== 201) {
+      console.error('POST /product response body (json):', res.body);
+      console.error('POST /product response text:', res.text);
+    }
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toHaveProperty('_id', 'mock-id');

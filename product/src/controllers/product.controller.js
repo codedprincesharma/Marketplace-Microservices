@@ -40,9 +40,33 @@ async function createProduct(req, res) {
 
     return res.status(201).json({ success: true, data: product });
   } catch (error) {
-    console.log('error:-', error);
+    console.error('error in createProduct:', error && error.stack ? error.stack : error);
     return res.status(500).json({ success: false, message: 'internal server error' });
   }
 }
 
-module.exports = { createProduct };
+async function getProduct(req, res) {
+  try {
+    const { q, minprice, maxprice, skip = 0, limit = 20 } = req.query;
+    const filter = {}
+
+    if (q) {
+      filter.$text = { $search: q }
+    }
+
+    if (minprice) {
+      filter['price.amount'] = { ...filter['price.amount'], $gte: Number(minprice) }
+    }
+
+    if (maxprice) {
+      filter['price.amount'] = { ...filter['price.amount'], $lte: Number(maxprice) }
+    }
+    const products = await Product.find(filter).skip(Number(skip)).limit(Number(limit)).sort({ createdAt: -1 });
+    return res.status(200).json({ data: products });
+  } catch (error) {
+    console.log('error in getProduct:', error && error.stack ? error.stack : error);
+
+  }
+}
+
+module.exports = { createProduct, getProduct };
