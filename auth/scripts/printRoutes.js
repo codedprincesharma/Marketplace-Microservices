@@ -1,4 +1,4 @@
-const app = require('../src/app')
+9const app = require('../src/app')
 
 function listRoutes(stack, prefix = '') {
   stack.forEach(layer => {
