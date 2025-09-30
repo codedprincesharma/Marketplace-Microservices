@@ -5,7 +5,7 @@ const { createProduct } = require('../controllers/product.controller');
 
 
 // POST /api/v1/product/product
-router.post('/', upload.single('image'), createProduct);
+router.post('/', upload.array('image', 5), createProduct);
 
 module.exports = router;
 

@@ -1,13 +1,11 @@
 const imagekit = require('../utlis/imageKit');
 const Product = require('../models/product.model');
 
-// initialize ImageKit with env vars (in tests we'll mock the SDK)
-
 async function createProduct(req, res) {
   try {
     const { name, description, price, seller } = req.body;
 
-
+    // safely parse price
     let parsedPrice = { amount: 0, currency: 'INR' };
     try {
       if (price) {
@@ -21,20 +19,21 @@ async function createProduct(req, res) {
 
     const productData = { name, description, price: parsedPrice, seller };
 
-    // if file present, upload to ImageKit
-    if (req.file) {
-      const uploadResult = await imagekit.upload({
-        file: req.file.buffer,
-        fileName: req.file.originalname
-      });
+    // if multiple files present, upload them all
+    if (req.files && req.files.length > 0) {
+      const uploads = await Promise.all(
+        req.files.map((file) =>
+          imagekit.upload({
+            file: file.buffer,
+            fileName: file.originalname,
+          })
+        )
+      );
 
-      productData.images = [
-        {
-          url: uploadResult.url,
-          thumbnailUrl: uploadResult.thumbnailUrl || uploadResult.url,
-          id: uploadResult.fileId || uploadResult.file_id || uploadResult.id
-        }
-      ];
+      productData.images = uploads.map((upload) => ({
+        url: upload.url,
+        id: upload.fileId || upload.file_id || upload.id,
+      }));
     }
 
     const created = await Product.create(productData);
@@ -44,5 +43,4 @@ async function createProduct(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
-
 module.exports = { createProduct };
