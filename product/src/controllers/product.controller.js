@@ -143,5 +143,24 @@ async function updateProduct(req, res) {
   }
 }
 
+async function deleteProduct(req, res) {
+  try {
+    const id = req.params.id; 
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    } 
+    if (String(product.seller) !== String(req.user.id)) {
+      return res.status(403).json({ success: false, message: 'Forbidden: not product owner' });
+    }
+    await Product.findByIdAndDelete(id);
+    return res.status(200).json({ success: true, message: 'Product deleted' });
+  }
+  catch (err) {
+    console.error('error in deleteProduct:', err.stack || err);
+    return res.status(500).json({ success: false, message: 'internal server error' });
+  }
+}
 
-module.exports = { createProduct, getProduct, getProductById, updateProduct };
+
+module.exports = { createProduct, getProduct, getProductById, updateProduct , deleteProduct };
