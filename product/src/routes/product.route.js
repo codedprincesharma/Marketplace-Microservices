@@ -18,6 +18,7 @@ router.get('/', getProduct)
 router.get('/:id', getProductById)
 router.patch('/:id', createAuthMiddleware(['admin', 'seller']), updateProduct)
 router.delete('/:id', createAuthMiddleware(['admin', 'seller']), deleteProduct)
+router.get('/seller/:sellerId', createAuthMiddleware('seller'), getProductBySeller)
 
 
 module.exports = router;
