@@ -22,7 +22,7 @@ function createAuthMiddleware(roles = ["user"]) {
         message: "Unauthorized: Invalid token"
       });
     }
-  };
+  }
 }
 
 module.exports = createAuthMiddleware;

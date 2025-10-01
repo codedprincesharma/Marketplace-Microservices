@@ -80,6 +80,7 @@ async function getProductById(req, res) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
     return res.status(200).json({ success: true, data: product });
+
   }
   catch (error) {
     console.log('error in getProductById:', error && error.stack ? error.stack : error);
@@ -87,7 +88,60 @@ async function getProductById(req, res) {
   }
 }
 
+async function updateProduct(req, res) {
+  try {
+    const { id } = req.body;
+
+    // validate id
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid product ID" });
+    }
+
+    // find product by id & seller
+    const product = await Product.findOne({ _id: id, seller: req.user.id });
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found or you are not the owner'
+      });
+    }
+
+    // allowed fields to update
+    const allowedUpdates = ['title', 'description', 'priceAmount', 'priceCurrency'];
+
+    for (const key of Object.keys(req.body)) {
+      if (allowedUpdates.includes(key)) {
+        if (key === 'priceAmount') {
+          if (typeof req.body.priceAmount === 'object') {
+            if (req.body.priceAmount.amount !== undefined) {
+              product.price.amount = Number(req.body.priceAmount.amount);
+            }
+            if (req.body.priceAmount.currency) {
+              product.price.currency = req.body.priceAmount.currency;
+            }
+          } else {
+            product.price.amount = Number(req.body.priceAmount);
+          }
+        } else if (key === 'priceCurrency') {
+          product.price.currency = req.body[key];
+        } else {
+          product[key] = req.body[key];
+        }
+      }
+    }
+
+    await product.save();
+
+    return res.status(200).json({ success: true, data: product });
+
+  } catch (error) {
+    console.error('error in updateProduct:', error.stack || error);
+    return res.status(500).json({
+      success: false,
+      message: 'internal server error'
+    });
+  }
+}
 
 
-
-module.exports = { createProduct, getProduct, getProductById };
+module.exports = { createProduct, getProduct, getProductById, updateProduct };
